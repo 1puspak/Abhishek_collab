@@ -21,7 +21,7 @@ resource "aws_instance" "webserver1" {
     type        = "ssh"
     host        = self.public_ip
     user        = "ec2-user"
-    private_key = file("./${var.key_name}")
+    private_key = file("/var/lib/jenkins/workspace/Create_ssh_key/${var.key_name}")
 }
 
 }
@@ -95,5 +95,5 @@ resource "aws_route_table_association" "ec2-crta-public-subnet-1"{
 }
 resource "aws_key_pair" "mykey" {
   key_name   = "first_key"
-  public_key = file("${var.key_name}.pub")
+  public_key = file("/var/lib/jenkins/workspace/Create_ssh_key/${var.key_name}.pub")
 }
