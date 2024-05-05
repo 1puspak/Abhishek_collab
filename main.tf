@@ -13,7 +13,7 @@ resource "aws_instance" "webserver1" {
     volume_size = 20     # Size in GB
     encrypted   = true   # Enable encryption
   }
-  key_name = aws_key_pair.generated_key.key_name
+  key_name = aws_key_pair.mykey.key_name
   provisioner "remote-exec" {
     inline = ["touch first.txt"]
   }
@@ -21,7 +21,7 @@ resource "aws_instance" "webserver1" {
     type        = "ssh"
     host        = self.public_ip
     user        = "ec2-user"
-    private_key = file(aws_key_pair.generated_key.key_name)
+    private_key = file("./first_key")
 }
 
 }
@@ -34,10 +34,6 @@ resource "tls_private_key" "example" {
   rsa_bits  = 4096
 }
 
-resource "aws_key_pair" "generated_key" {
-  key_name   = var.key_name
-  public_key = tls_private_key.example.public_key_openssh
-}
 resource "aws_security_group" "teraform_sg1" {
   vpc_id = "${aws_vpc.ec2-vpc.id}"
   name = "teraform_sg1"
@@ -62,6 +58,7 @@ resource "aws_vpc" "ec2-vpc" {
 
 resource "aws_subnet" "ec2-subnet-public-1" {
     vpc_id = "${aws_vpc.ec2-vpc.id}"
+    cidr_block = var.cidr_block_subnet
     availability_zone = var.availability_zone
     tags =  {
         Name = "ec2-subnet-public-1"
@@ -95,4 +92,8 @@ resource "aws_route_table" "ec2-public-crt" {
 resource "aws_route_table_association" "ec2-crta-public-subnet-1"{
     subnet_id = "${aws_subnet.ec2-subnet-public-1.id}"
     route_table_id = "${aws_route_table.ec2-public-crt.id}"
+}
+resource "aws_key_pair" "mykey" {
+  key_name   = "first_key"
+  public_key = file("first_key.pub")
 }
